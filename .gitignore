@@ -1,0 +1,3 @@
+# Ignore Ukraine data because we aren't using it right now
+data/raw/Ukraine/*
+data/raw/India/LFS/2*
