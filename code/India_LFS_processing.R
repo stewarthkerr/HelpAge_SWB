@@ -12,7 +12,6 @@ require(haven)
 
 # Load data
 b4 = read_sav("../data/raw/India/LFS/2011/Block_4_Demographic particulars of household members.sav")
-#b51 = read_sav("../data/raw/India/LFS/2011/Block_5_1_Usual principal activity particulars of household members.sav")
 b53 = read_sav("../data/raw/India/LFS/2011/Block_5_3_Time disposition during the week ended on .sav")
 
 # Create a unique ID for each individual by combining FSU, stratum, sub-stratum, hamlet group, second stage stratum, householdr, and individual serial numbers
@@ -21,7 +20,6 @@ LFS_ID = function(LFS_HH_df){
   return(out)
 }
 b4$ID = LFS_ID(b4)
-#b51$ID = LFS_ID(b51)
 b53$ID = LFS_ID(b53)
 
 # Create indicators for labor force and unemployed
@@ -31,7 +29,6 @@ b53$ID = LFS_ID(b53)
 ##### rentiers, pensioners, remittance recipients, etc. (94), not able to work due to disability (95), others (97), children, aged 0-4 (99)
 b53$labor_force = ifelse(b53$Current_Weekly_Activity_Status %in% c("91","92","93","94","95","97","99"), 0, 1)
 b53$unemployed = ifelse(b53$Current_Weekly_Activity_Status %in% c("81","82"), 1, 0)
-#b51_lf = filter(b53, ID %in% b53_lf$ID)
 
 # Calculate earnings
 ### In b53_lf, there can be multiple rows per person if they did different jobs during the week
@@ -53,10 +50,12 @@ b53 = mutate(b53, occupation = case_when(
   !is.na(Current_Weekly_Activity_NIC_2008) ~ "Other"
 ))
 
-# Keep only the variables we care about
+# Combine datasets and keep only the variables we care about
 # NOTE: There are a few other multipliers, not sure which we should keep
 b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, Sex, Age, b4_Multiplier = Multiplier_comb)
 b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, b53_Multiplier = Multiplier_comb, labor_force, unemployed) %>%
   distinct()
 out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID")
 
+# Save results
+write.csv(out, "../data/processed/2011_India_LFS_individuals.csv", na = "", row.names = FALSE)
