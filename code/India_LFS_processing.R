@@ -24,22 +24,38 @@ b4$ID = LFS_ID(b4)
 #b51$ID = LFS_ID(b51)
 b53$ID = LFS_ID(b53)
 
-# Subset data to only those in the labor force
+# Create indicators for labor force and unemployed
 # India 2011 LFS definition of labor force:
 ### Everyone except those who have current_weekly_activity_status of:
 ##### Attended educational institution (91), attended domestic duties only (92), attended domestic duties and ... (93),
 ##### rentiers, pensioners, remittance recipients, etc. (94), not able to work due to disability (95), others (97), children, aged 0-4 (99)
-b53_lf = filter(b51, !(Current_Weekly_Activity_Status %in% c("91","92","93","94","95","97","99")))
-b4_lf = filter(b4, ID %in% b53_lf$ID)
+b53$labor_force = ifelse(b53$Current_Weekly_Activity_Status %in% c("91","92","93","94","95","97","99"), 0, 1)
+b53$unemployed = ifelse(b53$Current_Weekly_Activity_Status %in% c("81","82"), 1, 0)
 #b51_lf = filter(b53, ID %in% b53_lf$ID)
 
-# rm full datasets because they're very large and I need space
-rm(b4, b53)
+# Calculate earnings
+### In b53_lf, there can be multiple rows per person if they did different jobs during the week
+### Sum earnings by person across all days of the week then join back to b53
+b53_earnings = summarise(group_by(b53, ID), weekly_earnings = sum(Wage_and_Salary_Earnings_Total, na.rm = TRUE))
+
+# Derive occupation 
+### There are many different occupation categories, collapse into a small number of groups
+### NOTE: Because this is the activity performed during the previous week, it may not be accurated to call it profession
+b53 = mutate(b53, occupation = case_when(
+  labor_force == 0  ~ "None",
+  unemployed == 1 ~ "None",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("01","02","03") ~ "Farming, forestry, or fishing",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32") ~ "Manufacturing",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("41","42","43") ~ "Construction",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("45","46","47") ~ "Trade",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("84","85") ~ "Public administration or education",
+  substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("49","50","51","52","53") ~ "Transportation",
+  !is.na(Current_Weekly_Activity_NIC_2008) ~ "Other"
+))
 
 # Keep only the variables we care about
 # NOTE: There are a few other multipliers, not sure which we should keep
-b4_lf = select(b4_lf, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, Sex, Age, b4_Multiplier = Multiplier_comb)
-b53_lf = select(b53_lf, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, Wage_and_Salary_Earnings_Total, b53_Multiplier = Multiplier_comb)
+b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, Sex, Age, b4_Multiplier = Multiplier_comb)
+b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, b53_Multiplier = Multiplier_comb, labor_force, unemployed) %>%
+  distinct()
 
-# In b53_lf, there can be multiple rows per person if they did different jobs during the week
-# Take the earnings as the sum over the week and the occupation as either the most frequent or the one they received most compensation for
