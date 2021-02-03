@@ -58,4 +58,5 @@ b53 = mutate(b53, occupation = case_when(
 b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, Sex, Age, b4_Multiplier = Multiplier_comb)
 b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, b53_Multiplier = Multiplier_comb, labor_force, unemployed) %>%
   distinct()
+out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID")
 

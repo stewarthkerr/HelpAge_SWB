@@ -1,3 +1,5 @@
 # Ignore Ukraine data because we aren't using it right now
 data/raw/Ukraine/*
-data/raw/India/LFS/2*
+data/raw/India/LFS/2011/Nss68_10_new_format/*
+data/raw/India/LFS/2011/Nss68_10_new_format.rar
+data/raw/India/LFS/2017-18/*
