@@ -10,3 +10,31 @@ df = read.csv("../data/processed/2011_India_LFS_individuals.csv")
 # Summarise count by sex, age category, and urban/rural
 sex_age5_urban = summarise(group_by(df, sex, age_group5, urban), count = n())
 sex_age10_urban = summarise(group_by(df, sex, age_group10, urban), count = n())
+
+# Summarise count by sex, age category, urban/rural, and income
+df$income = ifelse(df$weekly_earnings > 0, 1, 0)
+sex_age5_urban_income = summarise(group_by(df, sex, age_group5, urban, income), count = n(), average_earnings = mean(weekly_earnings))
+sex_age10_urban_income = summarise(group_by(df, sex, age_group10, urban, income), count = n(), average_earnings = mean(weekly_earnings))
+
+# Summarise count by sex, age category, and income
+sex_age5_income = summarise(group_by(df, sex, age_group5, income), count = n(), average_earnings = mean(weekly_earnings))
+sex_age10_income = summarise(group_by(df, sex, age_group10, income), count = n(), average_earnings = mean(weekly_earnings))
+
+
+# Summarise count by sex, age category, urban/rural, and disability
+df$disability = ifelse(df$Current_Weekly_Activity_Status == "95", 1, 0)
+sex_age5_urban_disability = summarise(group_by(df, sex, age_group5, urban, disability), count = n())
+sex_age10_urban_disability = summarise(group_by(df, sex, age_group10, urban, disability), count = n())
+
+# Summarise count by sex, age category, and disability
+sex_age5_disability = summarise(group_by(df, sex, age_group5, disability), count = n())
+sex_age10_disability = summarise(group_by(df, sex, age_group10, disability), count = n())
+
+# Summarise count by sex, age category, labor force/unemployment
+df = mutate(df, employment_status = case_when(
+  unemployed == 1 & labor_force == 1 ~ "Unemployed",
+  labor_force == 0 ~ "Not in labor force",
+  unemployed == 0 & labor_force == 1 ~ "Employed",
+  ))
+sex_age5_employment = summarise(group_by(df, sex, age_group5, employment_status), count = n())
+sex_age10_employment = summarise(group_by(df, sex, age_group10, employment_status), count = n())
