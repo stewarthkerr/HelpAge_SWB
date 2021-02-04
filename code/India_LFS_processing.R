@@ -35,10 +35,29 @@ b53$unemployed = ifelse(b53$Current_Weekly_Activity_Status %in% c("81","82"), 1,
 ### Sum earnings by person across all days of the week then join back to b53
 b53_earnings = summarise(group_by(b53, ID), weekly_earnings = sum(Wage_and_Salary_Earnings_Total, na.rm = TRUE))
 
+# Derive age group and translate sex from numbers to words
+### Doing groups of 5 and 10
+b4 = mutate(b4, age_group5 = case_when(
+  Age <= 59 ~ "Under 60",
+  Age < 65 ~ "60-64",
+  Age < 70 ~ "65-69",
+  Age < 75 ~ "70-74",
+  Age < 80 ~ "75-79",
+  Age < 85 ~ "80-84",
+  Age >= 85 ~ "85+" 
+  ), age_group10 = case_when(
+    Age <= 59 ~ "Under 60",
+    Age < 70 ~ "60-69",
+    Age < 80 ~ "70-79",
+    Age < 90 ~ "80-89",
+    Age >= 90 ~ "90+"
+  ),
+  sex = ifelse(Sex == "1", "Male", "Female"))
+
 # Derive occupation 
 ### There are many different occupation categories, collapse into a small number of groups
 ### NOTE: Because this is the activity performed during the previous week, it may not be accurated to call it profession
-b53 = mutate(b53, occupation = case_when(
+b53 = mutate(b53, urban = ifelse(Sector == "2", 1, 0), occupation = case_when(
   labor_force == 0  ~ "None",
   unemployed == 1 ~ "None",
   substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("01","02","03") ~ "Farming, forestry, or fishing",
@@ -48,12 +67,12 @@ b53 = mutate(b53, occupation = case_when(
   substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("84","85") ~ "Public administration or education",
   substring(Current_Weekly_Activity_NIC_2008, 1, 2) %in% c("49","50","51","52","53") ~ "Transportation",
   !is.na(Current_Weekly_Activity_NIC_2008) ~ "Other"
-))
+  ))
 
 # Combine datasets and keep only the variables we care about
 # NOTE: There are a few other multipliers, not sure which we should keep
-b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, Sex, Age, b4_Multiplier = Multiplier_comb)
-b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, b53_Multiplier = Multiplier_comb, labor_force, unemployed) %>%
+b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, Sample_Hhld_No, Person_Serial_No, sex, Age, age_group5, age_group10, Multiplier_comb)
+b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, urban, labor_force, unemployed, occupation) %>%
   distinct()
 out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID")
 
