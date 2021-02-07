@@ -1,0 +1,48 @@
+"sex","age_group5","industry","count","average_earnings"
+"Female","60-64","Construction",70,611.528571428571
+"Female","60-64","Farming, forestry, or fishing",915,108.851366120219
+"Female","60-64","Manufacturing",133,103.541353383459
+"Female","60-64","Other",350,355.42
+"Male","60-64","Construction",399,938.967418546366
+"Male","60-64","Farming, forestry, or fishing",2575,106.660194174757
+"Male","60-64","Manufacturing",457,545.312910284464
+"Male","60-64","Other",1467,536.430811179277
+"Female","65-69","Construction",33,636.242424242424
+"Female","65-69","Farming, forestry, or fishing",460,105.354347826087
+"Female","65-69","Manufacturing",61,93.1639344262295
+"Female","65-69","Other",161,290.186335403727
+"Male","65-69","Construction",180,875.927777777778
+"Male","65-69","Farming, forestry, or fishing",1638,82.8308913308913
+"Male","65-69","Manufacturing",239,238.142259414226
+"Male","65-69","Other",768,324.915364583333
+"Female","70-74","Construction",13,597.769230769231
+"Female","70-74","Farming, forestry, or fishing",157,75.8471337579618
+"Female","70-74","Manufacturing",30,196.833333333333
+"Female","70-74","Other",58,191.741379310345
+"Male","70-74","Construction",60,928.283333333333
+"Male","70-74","Farming, forestry, or fishing",768,47.6041666666667
+"Male","70-74","Manufacturing",92,180.391304347826
+"Male","70-74","Other",378,185.73544973545
+"Female","75-79","Construction",3,323.333333333333
+"Female","75-79","Farming, forestry, or fishing",38,81.1842105263158
+"Female","75-79","Manufacturing",8,15
+"Female","75-79","Other",16,108.875
+"Male","75-79","Construction",14,618.928571428571
+"Male","75-79","Farming, forestry, or fishing",269,72.2862453531599
+"Male","75-79","Manufacturing",45,114.888888888889
+"Male","75-79","Other",120,77.675
+"Female","80+","Farming, forestry, or fishing",20,35
+"Female","80+","Manufacturing",6,0
+"Female","80+","Other",7,188.571428571429
+"Male","80+","Construction",5,607
+"Male","80+","Farming, forestry, or fishing",169,36.1538461538462
+"Male","80+","Manufacturing",14,0
+"Male","80+","Other",60,239.533333333333
+"Female","Under 60","Construction",2182,737.434005499542
+"Female","Under 60","Farming, forestry, or fishing",18724,128.347575304422
+"Female","Under 60","Manufacturing",5324,217.432006010518
+"Female","Under 60","Other",11518,1596.86134745616
+"Male","Under 60","Construction",15423,1052.43091486741
+"Male","Under 60","Farming, forestry, or fishing",31067,209.906621173593
+"Male","Under 60","Manufacturing",14033,1059.12427848642
+"Male","Under 60","Other",53325,1696.86717299578

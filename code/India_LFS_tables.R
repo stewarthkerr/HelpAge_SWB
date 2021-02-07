@@ -31,10 +31,18 @@ sex_age5_disability = summarise(group_by(df, sex, age_group5, disability), count
 sex_age10_disability = summarise(group_by(df, sex, age_group10, disability), count = n())
 
 # Summarise count by sex, age category, labor force/unemployment
-df = mutate(df, employment_status = case_when(
-  unemployed == 1 & labor_force == 1 ~ "Unemployed",
-  labor_force == 0 ~ "Not in labor force",
-  unemployed == 0 & labor_force == 1 ~ "Employed",
-  ))
 sex_age5_employment = summarise(group_by(df, sex, age_group5, employment_status), count = n())
 sex_age10_employment = summarise(group_by(df, sex, age_group10, employment_status), count = n())
+
+# Summarise count by sex, age category, and industry
+sex_age5_industry = summarise(group_by(df, sex, age_group5, industry), count = n(), average_earnings = mean(weekly_earnings))
+sex_age10_industry = summarise(group_by(df, sex, age_group10, industry), count = n(), average_earnings = mean(weekly_earnings)) %>%
+  arrange(age_group10, sex, industry)
+
+# Summarise count by sex, age category, and industry for employed people
+employed = filter(df, employment_status == "Employed")
+employed_sex_age5_industry = summarise(group_by(employed, sex, age_group5, industry), count = n(), average_earnings = mean(weekly_earnings)) %>%
+  arrange(age_group5, sex, industry)
+
+# Save tables
+write.csv(employed_sex_age5_industry, "../data/final/2011_India_LFS_employed_sex_age5_industry.csv", row.names = FALSE)

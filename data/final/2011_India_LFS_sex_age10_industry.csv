@@ -1,0 +1,69 @@
+"sex","age_group10","industry","count","average_earnings"
+"Female","60-69","Construction",103,619.446601941748
+"Female","60-69","Farming, forestry, or fishing",1375,107.681454545455
+"Female","60-69","Manufacturing",194,100.278350515464
+"Female","60-69","None",10247,0
+"Female","60-69","Other",225,352.195555555556
+"Female","60-69","Public administration or education",51,1680.70588235294
+"Female","60-69","Trade",231,14.025974025974
+"Female","60-69","Transportation",4,729.25
+"Male","60-69","Construction",579,919.369602763385
+"Male","60-69","Farming, forestry, or fishing",4213,97.395442677427
+"Male","60-69","Manufacturing",696,439.833333333333
+"Male","60-69","None",4724,0
+"Male","60-69","Other",769,463.079323797139
+"Male","60-69","Public administration or education",139,3153.29496402878
+"Male","60-69","Trade",1154,94.0259965337955
+"Male","60-69","Transportation",173,772.005780346821
+"Female","70-79","Construction",16,546.3125
+"Female","70-79","Farming, forestry, or fishing",195,76.8871794871795
+"Female","70-79","Manufacturing",38,158.552631578947
+"Female","70-79","None",4519,0
+"Female","70-79","Other",26,380.653846153846
+"Female","70-79","Public administration or education",7,386.571428571429
+"Female","70-79","Trade",41,6.34146341463415
+"Male","70-79","Construction",74,869.756756756757
+"Male","70-79","Farming, forestry, or fishing",1037,54.00675024108
+"Male","70-79","Manufacturing",137,158.875912408759
+"Male","70-79","None",3208,0
+"Male","70-79","Other",191,226.455497382199
+"Male","70-79","Public administration or education",22,476.818181818182
+"Male","70-79","Trade",263,79.6425855513308
+"Male","70-79","Transportation",22,220
+"Female","80-89","Farming, forestry, or fishing",20,35
+"Female","80-89","Manufacturing",6,0
+"Female","80-89","None",1474,0
+"Female","80-89","Other",4,62.5
+"Female","80-89","Public administration or education",1,1000
+"Female","80-89","Trade",2,35
+"Male","80-89","Construction",4,590
+"Male","80-89","Farming, forestry, or fishing",163,34.478527607362
+"Male","80-89","Manufacturing",13,0
+"Male","80-89","None",1094,0
+"Male","80-89","Other",22,306.818181818182
+"Male","80-89","Public administration or education",2,3611
+"Male","80-89","Trade",28,14.2857142857143
+"Male","80-89","Transportation",2,0
+"Female","90+","None",312,0
+"Male","90+","Construction",1,675
+"Male","90+","Farming, forestry, or fishing",6,81.6666666666667
+"Male","90+","Manufacturing",1,0
+"Male","90+","None",194,0
+"Male","90+","Other",5,0
+"Male","90+","Trade",1,0
+"Female","Under 60","Construction",2182,737.434005499542
+"Female","Under 60","Farming, forestry, or fishing",18724,128.347575304422
+"Female","Under 60","Manufacturing",5324,217.432006010518
+"Female","Under 60","None",166356,0
+"Female","Under 60","Other",4568,1339.5288966725
+"Female","Under 60","Public administration or education",4191,2766.60510617991
+"Female","Under 60","Trade",2637,152.229048160789
+"Female","Under 60","Transportation",122,2273.8606557377
+"Male","Under 60","Construction",15423,1052.43091486741
+"Male","Under 60","Farming, forestry, or fishing",31067,209.906621173593
+"Male","Under 60","Manufacturing",14033,1059.12427848642
+"Male","Under 60","None",101019,0
+"Male","Under 60","Other",16020,1807.47609238452
+"Male","Under 60","Public administration or education",11046,4222.37841752671
+"Male","Under 60","Trade",17849,295.756120791081
+"Male","Under 60","Transportation",8410,1142.72675386445
