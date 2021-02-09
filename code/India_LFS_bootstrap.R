@@ -19,17 +19,19 @@ set.seed(1104)
 df = read.csv("../data/processed/2011_India_LFS_individuals.csv")
 employed = filter(df, employment_status == "Employed")
 
-# creates a variable with unique name based on unique grouping
-employed$analysis_group = paste(employed$sex, employed$age_group5, employed$industry, sep = "; ")
-
-# Performs bootstrap to calculate variance for all groups
-z = setNames(unique(employed$analysis_group), unique(employed$analysis_group)) %>% 
+# Performs bootstrap to calculate variance of income of all groups of employed people
+# Note: Uses 1000 replicates
+results = setNames(unique(employed$analysis_group), unique(employed$analysis_group)) %>% 
   map(function(group) {
     d2analyze = employed[employed$analysis_group == group, ]
-    b2 = boot(data = d2analyze, statistic = boot_mean, R = 100)
-    out = c(nrow(d2analyze), b2$t0, var(b2$t))
+    b2 = boot(data = d2analyze, statistic = boot_mean, R = 1000)
+    out = c(levels(employed$analysis_group)[group], nrow(d2analyze), b2$t0, var(b2$t))
     return(out)
     })
 
-  
+# Get results in a nice format
+results_df = as.data.frame(t(as.data.frame(results)), stringsAsFactors = FALSE) %>%
+  rename(group = V1, n = V2, estimate = V3, bootstrap_variance = V4) %>%
+  mutate(n = as.numeric(n), estimate = as.numeric(estimate), bootstrap_variance = as.numeric(bootstrap_variance))
+rownames(results_df) = NULL  
 # TODO: Generalize this code
