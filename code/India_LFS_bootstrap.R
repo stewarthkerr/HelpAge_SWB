@@ -6,10 +6,10 @@ require(dplyr)
 require(boot)
 require(purrr)
 
-# function to calculate mean that works with boot() function
+# function to calculate mean using weights that works with boot() function
 boot_mean = function(df, i){
   d2 = df[i,]
-  return(sum(d2$weekly_earnings) / nrow(d2))
+  return(sum(d2$weekly_earnings * d2$Multiplier_comb) / sum(d2$Multiplier_comb))
 }
 
 # Set seed for reproducibility
@@ -32,7 +32,8 @@ results = setNames(unique(employed$analysis_group), unique(employed$analysis_gro
 # Get results in a nice format
 results_df = as.data.frame(t(as.data.frame(results)), stringsAsFactors = FALSE) %>%
   rename(group = V1, n = V2, estimate = V3, bootstrap_variance = V4, SRS_variance = V5) %>%
-  mutate(n = as.numeric(n), estimate = as.numeric(estimate), bootstrap_variance = as.numeric(bootstrap_variance), SRS_variance = as.numeric(SRS_variance))
+  mutate(n = as.numeric(n), estimate = as.numeric(estimate), bootstrap_variance = as.numeric(bootstrap_variance), SRS_variance = as.numeric(SRS_variance)) %>%
+  mutate(design_effect_variance = 3 * SRS_variance)
 rownames(results_df) = NULL  
 
 # Save results
