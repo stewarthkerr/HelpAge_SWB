@@ -1,0 +1,188 @@
+---
+title: "HelpAge International: 2011 India NSS Analysis"
+author: "Stewart Kerr & Rick Griffin"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: 
+    fig_caption: true
+header-includes:
+  - \usepackage{caption}
+  - \usepackage{float}
+  - \floatplacement{figure}{H}
+  - \usepackage{setspace}
+  - \doublespacing
+---
+
+\captionsetup[table]{labelformat=empty}
+\captionsetup[figure]{labelformat=empty}
+
+```{r load_data, echo = FALSE, error = FALSE, warning=FALSE, include = FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=7, echo=FALSE, warning=FALSE, message=FALSE, fig.pos = 'h')
+
+require(ggplot2)
+require(GGally)
+require(gridExtra)
+require(tableone)
+require(furniture)
+require(lindia)
+require(broom) 
+require(knitr) 
+require(kableExtra)
+require(ggfortify)
+require(glmnet)
+require(plotmo)
+require(scales)
+require(JM)
+require(WR)
+require(stringr)
+require(dplyr)
+require(tidyr)
+require(MuMIn)
+require(RColorBrewer)
+
+#Define some functions we will use
+median_IQR = function(data, digits = 2){
+  # Calculate median and IQR
+  median = round(median(data),digits)
+  IQR = round(IQR(data),digits)
+  
+  # Put into string for output
+  out = paste0(median, " (", IQR, ")")
+}
+```
+
+# 1. Summary
+
+# 2. Introduction
+HelpAge International wants to challenge established norms for statistical reporting on older persons by proving that data disaggregation to a lower, more granular level is possible and statistically robust. Nongranular statistics reinforces an oversimplified picture of inequalities and the inadequate data itself becomes a barrier to the inclusion of at-risk and marginalized groups in policy and program responses. 
+
+To serve this goal, we analyzed data from the employment and unemployment surveys included in the 2011 India National Sample Survey (NSS)  to determine the lowest level of disaggregation that was possible while maintaining statistical robust estimates of average wage. The employment and unemployment surveys of the NSS aim to get estimates of various employment characteristics at the national and state level. In addition to employment related variables, individual characteristics such as region, age, sex, industry, education, and others are collected by the survey. In accordance with HelpAge's statement of work, we focused how earnings of employees varied by an individual's age, sex, employment industry, and region (urban/rural). Disability status was only collected in relationship to employment (i.e. unable to work due to disability) and was not available to analyze in relation to average earnings.
+
+In our analysis, we sought to answer three specific research questions related to data disaggregation:
+
+1. What is the most granular level of disaggregation of age, sex, and employment industry? What are the most appropriate age bands (i.e. 5 year groupings or 10 year groupings) and upper age cohort (i.e. 80+, 85+, etc)? How do results differ going from braoder to more granular disaggregation?
+2. What is the most granular level of disaggregation of age, sex, and employment industry when we also include geographic location (urban/rural)?
+3. Based on these results, what general recommendations or considerations can be made on data disaggregation for similar surveys?
+
+# 3. Materials and Methods
+## Data Collection
+The 2011 India NSS used a stratified multi-stage design. First villages in rural communities were selected by probability proportional to size with replacement while blocks in urban areas were selected by simple random sampling without replacement. An equal number of villages and blocks were selected. Next, if the village or block contained more than 1200 people, it was divided into subgroups containing roughly the same amount of people. Then, households within each subgroup were stratified into 3 groups according to to measures of wealth. Lastly, households from each strata were selected by simple random sampling without replacement and all individuals within the household were surveyed. Samplings weights were calculated and provided for each individual by the India Ministry of Statistics & Programme Implementation.
+
+We extracted the raw survey data in .sav (SPSS) format from the file provided by HelpAge using the required Nesstar Explorer software. For our analysis, we needed to extract the data files `Block_4_Demographic particulars of household members` and `Block 5_3_Time disposition during the week ended on `. This data was then loaded into R using the `haven` package and processed using the `tidyverse` set of R packages.
+
+## Data Processing
+First, in order to join demographic data in the "Block 4" (B4) dataset to employment data for the past week in the "Block 5_3" (B53) dataset, we had to create a unique ID. This was accomplished by concatenating the following variables for each dataset:
+* `FSU_Serial_No`, `Stratum`, `Sub_Stratum_No`, `Hamlet_Group_Sub_Block_No`, `Second_Stage_Stratum_No`, `Sample_Hhld_No`, and `Person_Serial_No`
+
+Then, before joining B4 and B53, the following variables were processed or created from the B53 dataset:
+* `employment_status` - Takes either "employed", "unemployed" or "not in labor force" depending on the value of `current_weekly_activity_status` 
+* `weekly_earnings` - An individual can have multiple entries in the B53 dataset if they performed multiple jobs during the week. Thus, for each person, we get their total weekly earnings by summing their earnings across the last 7 days.
+* `industry` - There are many industries reported in the `current_weekly_activity_NIC_2008` variable. We collapsed the industries into 4 groups based on sample size considerations: "farming, forestry, or fishing", "manufacturing", "construction", or "other".
+
+After creating these variables, we joined the B4 and B53 datasets as our "analysis dataset." As we are primarily interested in the average earnings of different groups, we focused only on employed individuals. However, there are many employed people in the dataset that did not report any earnings in the previous 7 days. Nevertheless, **we chose to keep those individuals in our analysis dataset.** Table 1 presents the descriptive statistics of the population included in our analysis dataset.
+
+```{r table1, echo = FALSE}
+#Separate by group
+df_mfe = filter(df_averaged, rating3 == "Meets Few Expectations")
+df_me = filter(df_averaged, rating3 == "Meets Expectations")
+df_ee = filter(df_averaged, rating3 == "Exceeds Expectations")
+
+#Get the columns for table 1
+t1_cols = c("Characteristic", "Meets Few Expectations", "Meets Expectations", "Exceeds Expectations", "Overall")
+t1_rows = c("Count", "Accountability Score", "FPP (thousands, $)", "Disabilities (%)", "Economic Disadvantage (%)", "English Deficiency (%)", "Moved Districts (%)")
+t1_count = c(nrow(df_mfe), nrow(df_me), nrow(df_ee), nrow(df_averaged))
+t1_score = c(median_IQR(df_mfe$score), median_IQR(df_me$score), median_IQR(df_ee$score), median_IQR(df_averaged$score))
+t1_funding = c(median_IQR(df_mfe$FPPT), median_IQR(df_me$FPPT), median_IQR(df_ee$FPPT), median_IQR(df_averaged$FPPT))
+t1_disabilities = c(median_IQR(df_mfe$pdisabilities), median_IQR(df_me$pdisabilities), median_IQR(df_ee$pdisabilities), median_IQR(df_averaged$pdisabilities))
+t1_poverty = c(median_IQR(df_mfe$ppoverty), median_IQR(df_me$ppoverty), median_IQR(df_ee$ppoverty), median_IQR(df_averaged$ppoverty))
+t1_ESL = c(median_IQR(df_mfe$pESL), median_IQR(df_me$pESL), median_IQR(df_ee$pESL), median_IQR(df_averaged$pESL))
+t1_bdm = c(median_IQR(df_mfe$pbetween_mobility), median_IQR(df_me$pbetween_mobility), median_IQR(df_ee$pbetween_mobility), median_IQR(df_averaged$pbetween_mobility))
+
+#Build the table
+t1_raw = cbind(t1_rows, rbind(t1_count, t1_score, t1_funding, t1_disabilities, t1_poverty, t1_ESL, t1_bdm))
+
+#Print the table
+kable(t1_raw,
+      caption = "Table 1. Summary of school district characteristics averaged over school years 2015-16 to 2018-19.",
+      digits = 2,
+      row.names = FALSE,
+      col.names = t1_cols,
+      align = 'c',
+      booktabs = T,
+      escape = TRUE,
+      linesep = "") %>% 
+  kable_styling(latex_options = c("hold_position")) %>%
+  column_spec(ncol(t1_raw), bold = TRUE) %>%
+  footnote(number= c("Fails to meet expectations was grouped with meets few expectations and significantly exceeds expectations was grouped with exceeds expectations.","Characteristics are summarized by median (inter-quartile range)."), threeparttable = TRUE)
+
+```
+
+## Statistical Analysis and Methodology
+
+```{r fig2, fig.width = 4.5, fig.height = 4.5, fig.cap = "Figure 2. A scatterplot and correlation matrix of district funding and characteristics averaged over all years."}
+#Write loess function
+line_fn <- function(data, mapping, method="loess", ...){
+      p <- ggplot(data = data, mapping = mapping) + 
+      geom_point(size = 0.2) + 
+      geom_smooth(method=method, ...)
+      p
+}
+
+fig2 = ggpairs(df_averaged, columns = 8:12, title = "", lower = list(continuous = line_fn), columnLabels = c("FPP", "Disabilities", "Poverty", "ESL", "Mobility")) + theme_bw()
+fig2
+```
+
+```{r fig3, fig.height = 4, fig.width = 6, fig.cap = "Figure 3. Distributions of district accountability score (A) and funding (B) averaged across school years."}
+rating5_colors = c("#70AD47", "#A8D08D", "#C5E0B3", "#F5ED87", "#F1B28F")
+fig3.1 = ggplot(df_averaged, aes(x = score, fill = rating5)) + geom_histogram() + theme_bw() + ylab("Number of Districts") + xlab("Accountability Score") + scale_fill_manual(values=rating5_colors, labels = c("Significantly Exceeds", "Exceeds", "Meets", "Meets Few")) + theme(legend.title=element_blank())
+fig3.2 = ggplot(df_averaged, aes(x = FPPT, fill = rating5)) + geom_histogram() + theme_bw() + ylab("") + xlab("Funding per Pupil ($, thousands)") + scale_fill_manual(values=rating5_colors) + theme(legend.title=element_blank())
+fig3 = ggarrange(fig3.1, fig3.2, ncol = 2, labels = c("A","B"), common.legend = TRUE)
+fig3
+```
+
+```{r fig4, fig.height = 5, fig.width = 6, fig.cap = "Figure 4. District characteristics vs. accountability rating averaged by district across school years."}
+rating3_colors = rating5_colors[2:4]
+fig4.1 = ggplot(df_averaged, aes(x = rating3, y = FPPT, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("FPP ($, thousands)")
+fig4.2 = ggplot(df_averaged, aes(x = rating3, y = pdisabilities, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Disabilities (%)")
+fig4.3 = ggplot(df_averaged, aes(x = rating3, y = ppoverty, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Economic Disadvantage (%)")
+fig4.4 = ggplot(df_averaged, aes(x = rating3, y = pESL, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("English Deficiency (%)")
+fig4.5 = ggplot(df_averaged, aes(x = rating3, y = pbetween_mobility, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Between District Mobility (%)")
+fig4 = ggarrange(fig4.1, fig4.2, fig4.3, fig4.4, fig4.5, ncol = 3, nrow = 2, common.legend = TRUE)
+fig4
+```
+
+```{r fig5, fig.height = 5, fig.width = 5, fig.cap = "Figure 5. Scatterplot of student poverty vs. accountability score averaged by district across school years."}
+fig5 = ggplot(df_averaged, aes(x = ppoverty, y = score)) + geom_point(size = 0.5) + geom_smooth(method = "lm") + theme_bw() + ylab("Accountability Score") + xlab("Economically Disadvantaged Students (%)")
+fig5
+```
+
+```{r fig6, fig.height = 5, fig.width = 5, fig.cap = "Figure 6. Interaction plot of funding and student poverty averaged by district across school years."}
+# calculate poverty quartiles
+ppoverty_quartiles = quantile(df_averaged$ppoverty)
+df_averaged = mutate(df_averaged, ppoverty_quartile = factor(case_when(
+  ppoverty > ppoverty_quartiles[4] ~ 1,
+  ppoverty > ppoverty_quartiles[3] ~ 2,
+  ppoverty > ppoverty_quartiles[2] ~ 3,
+  ppoverty >= ppoverty_quartiles[1] ~ 4))
+)
+
+#Get colors
+poverty_colors = brewer.pal(9,"Greens")[c(3,5,7,9)]
+
+#Make fig
+fig6 = ggplot(df_averaged, aes(x = FPPT, y = score, color = ppoverty_quartile)) + geom_point(size = 0.5) + geom_smooth(method = "lm", se = FALSE) + theme_bw() + scale_color_manual(values=poverty_colors, labels = c("Q1", "Q2", "Q3", "Q4")) + theme(legend.position = "top") + xlab("Funding per Pupil ($, thousands)") + ylab("Accountability Score") + labs(color = "Poverty Quartile")
+fig6
+```
+
+# 4. Discussion
+## Research question 1
+
+
+## Research question 2
+
+## Research question 3
+
+# 5. Conclusion
+
+# References
+1. Hillman, N. W., Fryar, A. H., Crespin-Trujillo, V. (2017) [*Evaluating the Impact of Performance Funding in Ohio and Tennessee*](https://journals.sagepub.com/doi/10.3102/0002831217732951) **American Educational Research Journal**

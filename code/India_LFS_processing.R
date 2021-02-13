@@ -53,8 +53,7 @@ b4 = mutate(b4, age_group5 = case_when(
     Age <= 59 ~ "Under 60",
     Age < 70 ~ "60-69",
     Age < 80 ~ "70-79",
-    Age < 90 ~ "80-89",
-    Age >= 90 ~ "90+"
+    Age >= 80 ~ "80+"
   ),
   sex = ifelse(Sex == "1", "Male", "Female"))
 
@@ -74,10 +73,11 @@ b53 = mutate(b53, urban = ifelse(Sector == "2", 1, 0), industry = case_when(
 
 # Combine datasets and keep only the variables we care about
 # NOTE: There are a few other multipliers, not sure which we should keep
-b4 = select(b4, ID, FSU_Serial_No, Stratum, Sub_Stratum_No, Hamlet_Group_Sub_Block_No, Second_Stage_Stratum_No, sex, Age, age_group5, age_group10, Multiplier_comb)
+b4 = select(b4, ID, sex, Age, age_group5, age_group10, Multiplier_comb)
 b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, urban, employment_status, industry) %>%
   distinct()
-out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID")
+out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID") %>%
+  select(ID, age_group5, age_group10, sex, employment_status, industry, urban, weekly_earnings, weight = Multiplier_comb)
 
 # Derive the groups we will use for our analysis
 # Here are our analysis groups:
@@ -88,17 +88,25 @@ out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID")
 ### 75-79: Farming and other for males
 ### 75+: Females no industry
 ### 80+: No industry
-out = mutate(out, analysis_group = case_when(
-  age_group5 == "Under 60" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
-  age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
-  age_group5 == "60-64" & sex == "Female" ~ paste(sex, age_group5, ifelse(industry %in% c("Manufacturing", "Construction"), "Manufacturing or Construction", industry), sep = ";"),
-  age_group5 == "65-69" & sex == "Male" ~ paste(sex, age_group5, industry, sep = ";"),
-  age_group5 == "65-69" & sex == "Female" ~ paste(sex, age_group5, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
-  age_group5 %in% c("70-74","75-79") & sex == "Male" ~ paste(sex, age_group5, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
-  age_group5 == "70-74" & sex == "Female" ~ paste(sex, age_group5, sep = ";"),
-  age_group5 %in% c("75-79", "80+") & sex == "Female" ~ paste(sex, "75+", sep = ";"),
-  age_group5 == "80+" & sex == "Male" ~ paste(sex, age_group5, sep = ";"),
-  TRUE ~ "No analysis group"
+out = mutate(out, analysis_group1 = case_when(
+    age_group5 == "Under 60" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
+    age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
+    age_group5 == "60-64" & sex == "Female" ~ paste(sex, age_group5, ifelse(industry %in% c("Manufacturing", "Construction"), "Manufacturing or Construction", industry), sep = ";"),
+    age_group5 == "65-69" & sex == "Male" ~ paste(sex, age_group5, industry, sep = ";"),
+    age_group5 == "65-69" & sex == "Female" ~ paste(sex, age_group5, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
+    age_group5 %in% c("70-74","75-79") & sex == "Male" ~ paste(sex, age_group5, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
+    age_group5 == "70-74" & sex == "Female" ~ paste(sex, age_group5, sep = ";"),
+    age_group5 %in% c("75-79", "80+") & sex == "Female" ~ paste(sex, "75+", sep = ";"),
+    age_group5 == "80+" & sex == "Male" ~ paste(sex, age_group5, sep = ";"),
+    TRUE ~ "No analysis group"
+  ),
+  analysis_group2 = case_when(
+    age_group10 == "Under 60" ~ paste(sex, age_group10, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
+    age_group10 == "60-69" & sex == "Male" ~ paste(sex, age_group10, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
+    age_group10 == "60-69" & sex == "Female" ~ paste(sex, age_group10, ifelse(industry %in% c("Manufacturing", "Construction"), "Manufacturing or Construction", industry), sep = ";"),
+    age_group10 == "70-79" & sex == "Male" ~ paste(sex, age_group10, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
+    age_group10 %in% c("70-79","80+") & sex == "Female" ~ paste(sex, "70+", sep = ";"),
+    TRUE ~ "No analysis group"
   ))
 
 # Save results
