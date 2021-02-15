@@ -105,7 +105,13 @@ out = mutate(out, analysis_group1 = case_when(
     age_group10 == "60-69" & sex == "Male" ~ paste(sex, age_group10, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
     age_group10 == "60-69" & sex == "Female" ~ paste(sex, age_group10, ifelse(industry %in% c("Manufacturing", "Construction"), "Manufacturing or Construction", industry), sep = ";"),
     age_group10 == "70-79" & sex == "Male" ~ paste(sex, age_group10, ifelse(industry == "Farming, forestry, or fishing", industry, "Other"), sep = ";"),
+    age_group10 == "80+" & sex == "Male" ~ paste(sex, age_group10, sep = ";"),    
     age_group10 %in% c("70-79","80+") & sex == "Female" ~ paste(sex, "70+", sep = ";"),
+    TRUE ~ "No analysis group"
+  ),
+  analysis_group3 = case_when(
+    age_group5 == "Under 60" ~ paste(sex, age_group10, industry),
+    age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry),
     TRUE ~ "No analysis group"
   ))
 

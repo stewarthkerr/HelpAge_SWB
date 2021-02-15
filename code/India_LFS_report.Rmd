@@ -19,26 +19,26 @@ header-includes:
 ```{r load_data, echo = FALSE, error = FALSE, warning=FALSE, include = FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=7, echo=FALSE, warning=FALSE, message=FALSE, fig.pos = 'h')
 
-require(ggplot2)
-require(GGally)
-require(gridExtra)
-require(tableone)
-require(furniture)
-require(lindia)
-require(broom) 
-require(knitr) 
+# require(ggplot2)
+# require(GGally)
+# require(gridExtra)
+# require(tableone)
+# require(furniture)
+# require(lindia)
+# require(broom) 
+# require(knitr) 
 require(kableExtra)
-require(ggfortify)
-require(glmnet)
-require(plotmo)
-require(scales)
-require(JM)
-require(WR)
-require(stringr)
-require(dplyr)
-require(tidyr)
-require(MuMIn)
-require(RColorBrewer)
+# require(ggfortify)
+# require(glmnet)
+# require(plotmo)
+# require(scales)
+# require(JM)
+# require(WR)
+# require(stringr)
+# require(dplyr)
+# require(tidyr)
+# require(MuMIn)
+# require(RColorBrewer)
 
 #Define some functions we will use
 median_IQR = function(data, digits = 2){
@@ -49,6 +49,10 @@ median_IQR = function(data, digits = 2){
   # Put into string for output
   out = paste0(median, " (", IQR, ")")
 }
+
+# Load the individuals dataset
+individuals = read.csv("../data/processed/2011_India_LFS_individuals.csv")
+
 ```
 
 # 1. Summary
@@ -79,31 +83,38 @@ Then, before joining B4 and B53, the following variables were processed or creat
 * `weekly_earnings` - An individual can have multiple entries in the B53 dataset if they performed multiple jobs during the week. Thus, for each person, we get their total weekly earnings by summing their earnings across the last 7 days.
 * `industry` - There are many industries reported in the `current_weekly_activity_NIC_2008` variable. We collapsed the industries into 4 groups based on sample size considerations: "farming, forestry, or fishing", "manufacturing", "construction", or "other".
 
-After creating these variables, we joined the B4 and B53 datasets as our "analysis dataset." As we are primarily interested in the average earnings of different groups, we focused only on employed individuals. However, there are many employed people in the dataset that did not report any earnings in the previous 7 days. Nevertheless, **we chose to keep those individuals in our analysis dataset.** Table 1 presents the descriptive statistics of the population included in our analysis dataset.
+After creating these variables, we joined the B4 and B53 datasets as our "analysis dataset." As we are primarily interested in the average earnings of different groups, we focused only on employed individuals. However, there are many employed people in the dataset that did not report any earnings in the previous 7 days. Nevertheless, **we chose to keep those individuals in our analysis dataset.** Table 1 presents the counts of the people included in our analysis dataset.
 
 ```{r table1, echo = FALSE}
-#Separate by group
-df_mfe = filter(df_averaged, rating3 == "Meets Few Expectations")
-df_me = filter(df_averaged, rating3 == "Meets Expectations")
-df_ee = filter(df_averaged, rating3 == "Exceeds Expectations")
+#Separate by employment status
+employed = filter(individuals, employment_status == "Employed")
+unemployed = filter(individuals, employment_status == "Unemployed")
+nlf = filter(individuals, employment_status == "Not in labor force")
 
+# Separate by sex
+employed_m = filter(employed, sex == "Male")
+employed_f = filter(employed, sex == "Female")
+unemployed_m = filter(unemployed, sex == "Male")
+unemployed_f = filter(unemployed, sex == "Female")
+nlf_m = filter(nlf, sex == "Male")
+nlf_f = filter(nlf, sex == "Female")
+
+  
 #Get the columns for table 1
-t1_cols = c("Characteristic", "Meets Few Expectations", "Meets Expectations", "Exceeds Expectations", "Overall")
-t1_rows = c("Count", "Accountability Score", "FPP (thousands, $)", "Disabilities (%)", "Economic Disadvantage (%)", "English Deficiency (%)", "Moved Districts (%)")
-t1_count = c(nrow(df_mfe), nrow(df_me), nrow(df_ee), nrow(df_averaged))
-t1_score = c(median_IQR(df_mfe$score), median_IQR(df_me$score), median_IQR(df_ee$score), median_IQR(df_averaged$score))
-t1_funding = c(median_IQR(df_mfe$FPPT), median_IQR(df_me$FPPT), median_IQR(df_ee$FPPT), median_IQR(df_averaged$FPPT))
-t1_disabilities = c(median_IQR(df_mfe$pdisabilities), median_IQR(df_me$pdisabilities), median_IQR(df_ee$pdisabilities), median_IQR(df_averaged$pdisabilities))
-t1_poverty = c(median_IQR(df_mfe$ppoverty), median_IQR(df_me$ppoverty), median_IQR(df_ee$ppoverty), median_IQR(df_averaged$ppoverty))
-t1_ESL = c(median_IQR(df_mfe$pESL), median_IQR(df_me$pESL), median_IQR(df_ee$pESL), median_IQR(df_averaged$pESL))
-t1_bdm = c(median_IQR(df_mfe$pbetween_mobility), median_IQR(df_me$pbetween_mobility), median_IQR(df_ee$pbetween_mobility), median_IQR(df_averaged$pbetween_mobility))
+t1_cols = c("", rep(c("Male", "Female"), 3), "Overall")
+t1_rows = c("Under 60", "60-64", "65-69", "70-74", "75-79", "80+", "Farming, forestry, or fishing", "Manufacturing", "Construction", "Other", "Urban", "Rural", "Total")
+t1_count = function(df){
+  out = c(sum(df$age_group5 == "Under 60"), sum(df$age_group5 == "60-64"), sum(df$age_group5 == "65-69"), sum(df$age_group5 == "70-74"), sum(df$age_group5 == "75-79"), sum(df$age_group5 == "80+"), sum(df$industry == "Farming, forestry, or fishing"), sum(df$industry == "Manufacturing"), sum(df$industry == "Construction"), sum(df$industry == "Other"), sum(df$urban == 1), sum(df$urban == 0), nrow(df))
+  return(out)
+}
+t1_counts = cbind(t1_count(employed_m), t1_count(employed_f), t1_count(unemployed_m), t1_count(unemployed_f), t1_count(nlf_m), t1_count(nlf_f), t1_count(individuals))
 
 #Build the table
-t1_raw = cbind(t1_rows, rbind(t1_count, t1_score, t1_funding, t1_disabilities, t1_poverty, t1_ESL, t1_bdm))
+t1_raw = cbind(t1_rows, t1_counts)
 
 #Print the table
 kable(t1_raw,
-      caption = "Table 1. Summary of school district characteristics averaged over school years 2015-16 to 2018-19.",
+      caption = "Table 1. Counts of people in various groupings of the 2011 India NSS survey..",
       digits = 2,
       row.names = FALSE,
       col.names = t1_cols,
@@ -113,7 +124,7 @@ kable(t1_raw,
       linesep = "") %>% 
   kable_styling(latex_options = c("hold_position")) %>%
   column_spec(ncol(t1_raw), bold = TRUE) %>%
-  footnote(number= c("Fails to meet expectations was grouped with meets few expectations and significantly exceeds expectations was grouped with exceeds expectations.","Characteristics are summarized by median (inter-quartile range)."), threeparttable = TRUE)
+  add_header_above(c(" " = 1, "Employed" = 2, "Unemployed" = 2, "Not in labor force" = 2, " " = 1))
 
 ```
 
@@ -176,7 +187,6 @@ fig6
 
 # 4. Discussion
 ## Research question 1
-
 
 ## Research question 2
 
