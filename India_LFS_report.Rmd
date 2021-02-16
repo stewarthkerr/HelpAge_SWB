@@ -35,7 +35,7 @@ require(kableExtra)
 # require(JM)
 # require(WR)
 # require(stringr)
-# require(dplyr)
+require(dplyr)
 # require(tidyr)
 # require(MuMIn)
 # require(RColorBrewer)
@@ -51,7 +51,7 @@ median_IQR = function(data, digits = 2){
 }
 
 # Load the individuals dataset
-individuals = read.csv("../data/processed/2011_India_LFS_individuals.csv")
+individuals = read.csv("data/processed/2011_India_LFS_individuals.csv")
 
 ```
 
@@ -114,7 +114,7 @@ t1_raw = cbind(t1_rows, t1_counts)
 
 #Print the table
 kable(t1_raw,
-      caption = "Table 1. Counts of people in various groupings of the 2011 India NSS survey..",
+      caption = "Table 1. Counts of people in various groupings of the 2011 India NSS survey.",
       digits = 2,
       row.names = FALSE,
       col.names = t1_cols,
@@ -129,61 +129,6 @@ kable(t1_raw,
 ```
 
 ## Statistical Analysis and Methodology
-
-```{r fig2, fig.width = 4.5, fig.height = 4.5, fig.cap = "Figure 2. A scatterplot and correlation matrix of district funding and characteristics averaged over all years."}
-#Write loess function
-line_fn <- function(data, mapping, method="loess", ...){
-      p <- ggplot(data = data, mapping = mapping) + 
-      geom_point(size = 0.2) + 
-      geom_smooth(method=method, ...)
-      p
-}
-
-fig2 = ggpairs(df_averaged, columns = 8:12, title = "", lower = list(continuous = line_fn), columnLabels = c("FPP", "Disabilities", "Poverty", "ESL", "Mobility")) + theme_bw()
-fig2
-```
-
-```{r fig3, fig.height = 4, fig.width = 6, fig.cap = "Figure 3. Distributions of district accountability score (A) and funding (B) averaged across school years."}
-rating5_colors = c("#70AD47", "#A8D08D", "#C5E0B3", "#F5ED87", "#F1B28F")
-fig3.1 = ggplot(df_averaged, aes(x = score, fill = rating5)) + geom_histogram() + theme_bw() + ylab("Number of Districts") + xlab("Accountability Score") + scale_fill_manual(values=rating5_colors, labels = c("Significantly Exceeds", "Exceeds", "Meets", "Meets Few")) + theme(legend.title=element_blank())
-fig3.2 = ggplot(df_averaged, aes(x = FPPT, fill = rating5)) + geom_histogram() + theme_bw() + ylab("") + xlab("Funding per Pupil ($, thousands)") + scale_fill_manual(values=rating5_colors) + theme(legend.title=element_blank())
-fig3 = ggarrange(fig3.1, fig3.2, ncol = 2, labels = c("A","B"), common.legend = TRUE)
-fig3
-```
-
-```{r fig4, fig.height = 5, fig.width = 6, fig.cap = "Figure 4. District characteristics vs. accountability rating averaged by district across school years."}
-rating3_colors = rating5_colors[2:4]
-fig4.1 = ggplot(df_averaged, aes(x = rating3, y = FPPT, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("FPP ($, thousands)")
-fig4.2 = ggplot(df_averaged, aes(x = rating3, y = pdisabilities, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Disabilities (%)")
-fig4.3 = ggplot(df_averaged, aes(x = rating3, y = ppoverty, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Economic Disadvantage (%)")
-fig4.4 = ggplot(df_averaged, aes(x = rating3, y = pESL, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("English Deficiency (%)")
-fig4.5 = ggplot(df_averaged, aes(x = rating3, y = pbetween_mobility, fill = rating3)) + geom_boxplot(width = 0.3, outlier.size = 0.3) + theme_bw() + scale_fill_manual(values=rating3_colors) + theme(legend.title=element_blank(), axis.text.x = element_blank()) + xlab("Accountability Rating") + ylab("Between District Mobility (%)")
-fig4 = ggarrange(fig4.1, fig4.2, fig4.3, fig4.4, fig4.5, ncol = 3, nrow = 2, common.legend = TRUE)
-fig4
-```
-
-```{r fig5, fig.height = 5, fig.width = 5, fig.cap = "Figure 5. Scatterplot of student poverty vs. accountability score averaged by district across school years."}
-fig5 = ggplot(df_averaged, aes(x = ppoverty, y = score)) + geom_point(size = 0.5) + geom_smooth(method = "lm") + theme_bw() + ylab("Accountability Score") + xlab("Economically Disadvantaged Students (%)")
-fig5
-```
-
-```{r fig6, fig.height = 5, fig.width = 5, fig.cap = "Figure 6. Interaction plot of funding and student poverty averaged by district across school years."}
-# calculate poverty quartiles
-ppoverty_quartiles = quantile(df_averaged$ppoverty)
-df_averaged = mutate(df_averaged, ppoverty_quartile = factor(case_when(
-  ppoverty > ppoverty_quartiles[4] ~ 1,
-  ppoverty > ppoverty_quartiles[3] ~ 2,
-  ppoverty > ppoverty_quartiles[2] ~ 3,
-  ppoverty >= ppoverty_quartiles[1] ~ 4))
-)
-
-#Get colors
-poverty_colors = brewer.pal(9,"Greens")[c(3,5,7,9)]
-
-#Make fig
-fig6 = ggplot(df_averaged, aes(x = FPPT, y = score, color = ppoverty_quartile)) + geom_point(size = 0.5) + geom_smooth(method = "lm", se = FALSE) + theme_bw() + scale_color_manual(values=poverty_colors, labels = c("Q1", "Q2", "Q3", "Q4")) + theme(legend.position = "top") + xlab("Funding per Pupil ($, thousands)") + ylab("Accountability Score") + labs(color = "Poverty Quartile")
-fig6
-```
 
 # 4. Discussion
 ## Research question 1
