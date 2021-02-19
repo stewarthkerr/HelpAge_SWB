@@ -1,16 +1,16 @@
 ---
-title: "HelpAge International: 2011 India NSS Analysis"
+title: 'HelpAge International: 2011 India NSS Analysis'
 author: "Stewart Kerr & Rick Griffin"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: 
-    fig_caption: true
+  pdf_document:
+    fig_caption: yes
 header-includes:
-  - \usepackage{caption}
-  - \usepackage{float}
-  - \floatplacement{figure}{H}
-  - \usepackage{setspace}
-  - \doublespacing
+- \usepackage{caption}
+- \usepackage{float}
+- \floatplacement{figure}{H}
+- \usepackage{setspace}
+- \doublespacing
 ---
 
 \captionsetup[table]{labelformat=empty}
@@ -64,7 +64,7 @@ To serve this goal, we analyzed data from the employment and unemployment survey
 
 In our analysis, we sought to answer three specific research questions related to data disaggregation:
 
-1. What is the most granular level of disaggregation of age, sex, and employment industry? What are the most appropriate age bands (i.e. 5 year groupings or 10 year groupings) and upper age cohort (i.e. 80+, 85+, etc)? How do results differ going from braoder to more granular disaggregation?
+1. What is the most granular level of disaggregation of age, sex, and employment industry? What are the most appropriate age bands (i.e. 5 year groupings or 10 year groupings) and upper age cohort (i.e. 80+, 85+, etc)? How do results differ going from broader to more granular disaggregation?
 2. What is the most granular level of disaggregation of age, sex, and employment industry when we also include geographic location (urban/rural)?
 3. Based on these results, what general recommendations or considerations can be made on data disaggregation for similar surveys?
 
@@ -128,16 +128,58 @@ kable(t1_raw,
 
 ```
 
-## Statistical Analysis and Methodology
+## Statistical Analysis and Results
+For each grouping of employed people, we are interested in the average weekly earnings. The average earnings were calculated using the survey weights, which indicate how many individuals in India's population that a sampled person represents. That is, for each group we performed the calculation:
+
+$$
+\frac{\sum_i w_iY_i}{\sum_iw_i}
+$$
+where $w_i$ is the weight and $Y_i$ is the weekly earnings for individual i within the grouping. Then, the standard error of these weighted estimates was calculated using a simple bootstrap method^1^. A bootstrap method was chosen because the survey design is highly complex and calculating standard errors while accounting for this design would be difficult and complicated. The cost of using bootstrap to estimate standard errors instead of incorporating the survey design causes our standard errors to be slightly larger, however, we compared our bootstrap standard errors with a simple random sampling variance multiplied by a cluster sampling design effect to verify that the bootstrap variances magnitudes were reasonable. 
+
+For each group identified below, 1000 independent bootstrap replicates each of the size of the group were selected by simple random sampling with replacement. Thus, each bootstrap replicate has the same sample size as the group but some sample persons might be selected more than once and others not at all in each replicate. For each replicate, the weighted average earnings were calculated as described above. Then, the sample variance over these 1000 weighted estimates was calculated and the square root of the variance is the standard error. For each grouping, 95% confidence intervals for the estimate of weekly earnings were calculated using this formula:
+
+$$
+\bar{Y} \pm 1.96\times SE(\bar{Y})
+$$
+
+where $\bar{Y}$ is the weighted estimate from the original sample and $SE(\bar{Y})$ is the standard error of the estimate calculated using the bootstrap procedure.
+
+To produce accurate estimates that are statistically robust, we suggest including at least 150 sampled persons in the group. With this consideration, we first considered the most granular level of disaggregation: stratification by 5 year age groups sex, industry, and geographic location (urban/rural) across the board. In most cases, our sample size was not large enough to include the secondary level of disaggregation of urban/rural. Specifically, we were only able to include urban/rural for employed person's under the age of 60 and men aged 60-64. Additionally, as the count of employed people decreased at older ages, we had to collapse industry categories in order to maintain a sample size that was close to or greater than 150. At our oldest age groups, we had to drop stratification by industry entirely. After collapsing these levels of disaggregation, we arrived at the most granular level of disaggregation that we can recommend as being statistically robust for this particular survey. These results are shown in table 2.
+
+table 2
+
+Next, we used the same stratification categories with 10 year age groupings instead of 5 year age groupings to assess the difference of results using different age groupings. The results of this comparison are shown in table 3.
+
+table 3
+
+Lastly, we dropped the secondary level of disaggregation, geographic location, entirely to examine how different the results are whenever less disaggregation is performed. As we included urban/rural only for people younger than 60 and men aged 60-64 in our primary analysis, we can only compare results for a small subset of groupings. The results of this comparison are shown in table 4.
+
+table 4
+
+Now, we include instructions and an example on the comparison of any two particular groups. For any two groups, if the 95% confidence intervals do not overlap then it is clear that the average earnings in the two groups are significantly different. If the confidence intervals do overlap, then a simple 5% error hypothesis test can be used to test the null hypothesis that the two groups have the same average wage. The detectable difference between two estimates is 1.96 times the standard error of the difference between the two estimates. The standard error of the difference is calculated as:
+
+$$
+\sqrt{SE_1^2 + SE_2^2}
+$$
+
+where $SE_1$ is the standard error of the estimate for group 1's earnings and $SE_2$ is the standard error of the estimate for group 2's earnings. 
+
+We illustrate this procedure for the comparison of the estimated average earnings of males age 60-64 in the manufacturing industry (group 1) and males age 60-64 in the "other" industry group (group 2). The estimated average wage for group 1 is $\sim567$ and the standard error is $\sim92$. The estimated wage for group 2 is $\sim493$ and the standard error is $\sim65$. The square root of $92^2$ plus $65^2$ is $\sqrt{92^2 + 65^2} = 112.65$, so the detectable difference is $1.96 \times 112.65 = 220.79$. Since the difference is $567- 493  = 74$, we cannot claim the true values are statistically different. 
 
 # 4. Discussion
 ## Research question 1
+For males and females under age 60 as well as males age 60-64, all 4 industry as well as urban/rural categories have enough sample to accurately estimate average wage of employed persons. For males 65-69 it is necessary to eliminate urban/rural but all 4 industry categories can be kept. For males age 70-74 and age 74-79 it is necessary to collapse to two industry categories while for males 80+ there are not enough employed persons to support any industry categories.
+
+For Females age 60-64 and age 65-69 some collapsing of industry categories is necessary while females 70+ and 75+ do not have enough employed for any industry categories,
+
 
 ## Research question 2
+Urban or rural can only be used for males and females under age 60 and males age 60-64. Other age and sex categories do not have enough employed persons for accurate estimation of average wage.
 
 ## Research question 3
+Data disaggregation for other surveys depend heavily on the sample design and sample allocation. It is likely necessary to have at least 150 sample cases in any age/sex/industry or occupation/ geographic categories to define estimation groups. The survey designers need to keep this in mind. If estimates are desired for 5 year age/sex groups sufficient sample is necessary in those groups. 
 
 # 5. Conclusion
 
 # References
-1. Hillman, N. W., Fryar, A. H., Crespin-Trujillo, V. (2017) [*Evaluating the Impact of Performance Funding in Ohio and Tennessee*](https://journals.sagepub.com/doi/10.3102/0002831217732951) **American Educational Research Journal**
+1. [*Introduction to Bootstrapping in Statistics with an Example - Jim Frost*](https://statisticsbyjim.com/hypothesis-testing/bootstrapping/)
