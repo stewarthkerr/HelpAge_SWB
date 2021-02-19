@@ -110,8 +110,8 @@ out = mutate(out, analysis_group1 = case_when(
     TRUE ~ "No analysis group"
   ),
   analysis_group3 = case_when(
-    age_group5 == "Under 60" ~ paste(sex, age_group10, industry),
-    age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry),
+    age_group5 == "Under 60" ~ paste(sex, age_group10, industry, sep = ";"),
+    age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry, sep = ";"),
     TRUE ~ "No analysis group"
   ))
 
