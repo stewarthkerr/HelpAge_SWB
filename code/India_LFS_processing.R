@@ -73,14 +73,14 @@ b53 = mutate(b53, urban = ifelse(Sector == "2", 1, 0), industry = case_when(
 
 # Combine datasets and keep only the variables we care about
 # NOTE: There are a few other multipliers, not sure which we should keep
-b4 = select(b4, ID, sex, Age, age_group5, age_group10, Multiplier_comb)
+b4 = select(b4, ID, sex, age = Age, age_group5, age_group10, Multiplier_comb)
 b53 = select(b53, ID, Current_Weekly_Activity_Status, Current_Weekly_Activity_NIC_2008, urban, employment_status, industry) %>%
   distinct()
 out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID") %>%
-  select(ID, age_group5, age_group10, sex, employment_status, industry, urban, weekly_earnings, weight = Multiplier_comb)
+  select(ID, age, age_group5, age_group10, sex, employment_status, industry, urban, weekly_earnings, weight = Multiplier_comb)
 
 # Derive the groups we will use for our analysis
-# Here are our analysis groups:
+# Analysis group 1:
 ### Under 60: All 4 industries and urban/rural for both male and females
 ### 60-64: All 4 industries and urban/rural for males, farming, construction, and manufacturing for females
 ### 65-69: All 4 industries for males, farming and other for females
@@ -88,6 +88,10 @@ out = left_join(b4, left_join(b53, b53_earnings, by = "ID"), by = "ID") %>%
 ### 75-79: Farming and other for males
 ### 75+: Females no industry
 ### 80+: No industry
+# Analysis group 2:
+### Same as analysis group 1 but with 10 year age groups
+# Analysis group 3:
+### Drop urban/rural for under 60 and 60-64
 out = mutate(out, analysis_group1 = case_when(
     age_group5 == "Under 60" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
     age_group5 == "60-64" & sex == "Male" ~ paste(sex, age_group5, industry, ifelse(out$urban == 1, "Urban", "Rural"), sep = ";"),
