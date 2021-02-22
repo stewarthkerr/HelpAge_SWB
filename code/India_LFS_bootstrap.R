@@ -52,7 +52,7 @@
         ag_row$age_group %in% c("60-64", "60-69") ~ 60,
         ag_row$age_group == "65-69" ~ 65,
         ag_row$age_group %in% c("70+", "70-74", "70-79") ~ 70,
-        ag_row$age_group == "75" ~ 75,
+        ag_row$age_group %in% c("75+", "75-79") ~ 75,
         TRUE ~ 80
         )
       
@@ -76,41 +76,36 @@
       return(out)
     }
     
-    # Performs bootstrap to calculate variance of income of all groups of employed people
-    # for each of the different analysis groups 
+    # Performs bootstrap to calculate variance of income of a group of employed people
     # Note: Uses 1000 replicates
-    bootstrap_by_group = function(analysis_group){
-      # Bootstrap by group
-      results = setNames(unique(employed[,analysis_group]), unique(employed[,analysis_group])) %>% 
-        map(function(group) {
-          d2analyze = employed[employed[,analysis_group] == group, ]
-          b2 = boot(data = d2analyze, statistic = boot_mean, R = 1000)
-          out = c(levels(employed[,analysis_group])[group], nrow(d2analyze), b2$t0, var(b2$t), var(d2analyze$weekly_earnings) / nrow(d2analyze))
-          return(out)
-          })
-    
-      # Get results in a nice format
-      results_df = as.data.frame(t(as.data.frame(results)), stringsAsFactors = FALSE) %>%
-        rename(group = V1, n = V2, estimate = V3, bootstrap_variance = V4, SRS_variance = V5) %>%
-        mutate(n = as.numeric(n), estimate = as.numeric(estimate), bootstrap_variance = as.numeric(bootstrap_variance), SRS_variance = as.numeric(SRS_variance)) %>%
-        mutate(bootstrap_SE = sqrt(bootstrap_variance))
-      rownames(results_df) = NULL
-      results_df = arrange(results_df, desc(n))
-    
-      return(results_df)
+    bootstrap_by_group = function(ag_row){
+      # Get the group we will bootstrap
+      bootstrap_df = filter_by_ag(ag_row)
+      n = nrow(bootstrap_df)
+      
+      # If n >= 150 or (women 75+) or (men, 60-64, urban, construction), then do the bootstrap
+      # Note: women 75+ and men, 60-64, urban, construction are below n = 150 but we perform them so we can have a complete set of results
+      if(n >= 150 | 
+        (ag_row$sex == "Female" & ag_row$age_group == "75+") | 
+        (ag_row$sex == "Male" & ag_row$age_group == "60-64" & ag_row$industry == "Construction" & ag_row$geo == "Urban")){
+          b2 = boot(bootstrap_df, statistic = boot_mean, R = 1000)
+          out = c(ag_row, "n" = n, "estimate" = b2$t0, "bootstrap_variance" = var(b2$t), "SRS_variance" = var(bootstrap_df$weekly_earnings) / n)
+        }
+        
+      # Else, n < 150 and not in preferred analysis group, don't bootstrap, just return n
+      else{
+        out = c(ag_row, "n" = n, "estimate" = NaN, "bootstrap_variance" = NaN, "SRS_variance" = NaN)
+      }
+      
+      return(as.data.frame(out))
     }
     
-    # Run bootstrap for each of our 3 analysis groups
-    results1 = bootstrap_by_group("analysis_group1")
-    results2 = bootstrap_by_group("analysis_group2")
-    results3 = bootstrap_by_group("analysis_group3")
-    
-    # Remove "no analysis group", duplicates, and create upper and lower bounds of CI
-    results1 = filter(results1, group != "No analysis group")
-    results2 = filter(results2, group != "No analysis group")
-    results3 = filter(results3, group != "No analysis group")
-    results_df = rbind(results1, results2, results3) %>%
-      mutate(lower = estimate - (1.96 * bootstrap_SE), upper = estimate + (1.96 * bootstrap_SE)) %>%
-      distinct(group, .keep_all = TRUE)
+    # Perform bootstrap for each analysis group
+    results = bootstrap_by_group(analysis_groups[1,])
+    for(i in seq(2, nrow(analysis_groups))){
+      results = rbind(results, bootstrap_by_group(analysis_groups[i,]))
+    }
 
-write.csv(results_df, "../data/final/2011_India_LFS_bootstrap_results.csv", row.names = FALSE)
+# Create a few more columns and save
+results = mutate(results, bootstrap_SE = sqrt(bootstrap_variance), lower = estimate - (1.96 * sqrt(bootstrap_variance)), upper = estimate + (1.96 * sqrt(bootstrap_variance))) 
+write.csv(results, "../data/final/2011_India_LFS_bootstrap_results.csv", row.names = FALSE)
