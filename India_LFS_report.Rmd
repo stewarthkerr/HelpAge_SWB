@@ -50,9 +50,7 @@ results = read.csv("data/final/2011_India_LFS_bootstrap_results.csv")
 
 ```
 
-# 1. Summary
-
-# 2. Introduction
+# 1. Introduction
 HelpAge International wants to challenge established norms for statistical reporting on older persons by proving that data disaggregation to a lower, more granular level is possible and statistically robust. Nongranular statistics reinforces an oversimplified picture of inequalities and the inadequate data itself becomes a barrier to the inclusion of at-risk and marginalized groups in policy and program responses. 
 
 To serve this goal, we analyzed data from the employment and unemployment surveys included in the 2011 India National Sample Survey (NSS)  to determine the lowest level of disaggregation that was possible while maintaining statistical robust estimates of average wage. The employment and unemployment surveys of the NSS aim to get estimates of various employment characteristics at the national and state level. In addition to employment related variables, individual characteristics such as region, age, sex, industry, education, and others are collected by the survey. In accordance with HelpAge's statement of work, we focused how earnings of employees varied by an individual's age, sex, employment industry, and region (urban/rural). Disability status was only collected in relationship to employment (i.e. unable to work due to disability) and was not available to analyze in relation to average earnings.
@@ -63,7 +61,7 @@ In our analysis, we sought to answer three specific research questions related t
 2. What is the most granular level of disaggregation of age, sex, and employment industry when we also include geographic location (urban/rural)?
 3. Based on these results, what general recommendations or considerations can be made on data disaggregation for similar surveys?
 
-# 3. Materials and Methods
+# 2. Materials and Methods
 ## Data Collection
 The 2011 India NSS used a stratified multi-stage design. First villages in rural communities were selected by probability proportional to size with replacement while blocks in urban areas were selected by simple random sampling without replacement. An equal number of villages and blocks were selected. Next, if the village or block contained more than 1200 people, it was divided into subgroups containing roughly the same amount of people. Then, households within each subgroup were stratified into 3 groups according to to measures of wealth. Lastly, households from each strata were selected by simple random sampling without replacement and all individuals within the household were surveyed. Samplings weights were calculated and provided for each individual by the India Ministry of Statistics & Programme Implementation.
 
@@ -119,6 +117,7 @@ kable(t1_raw,
       linesep = "") %>% 
   kable_styling(latex_options = c("hold_position")) %>%
   column_spec(ncol(t1_raw), bold = TRUE) %>%
+  row_spec(nrow(t1_raw), bold = TRUE) %>%
   add_header_above(c(" " = 1, "Employed" = 2, "Unemployed" = 2, "Not in labor force" = 2, " " = 1))
 
 ```
@@ -153,79 +152,57 @@ where $SE_1$ is the standard error of the estimate for group 1's earnings and $S
 
 We illustrate this procedure for the comparison of the estimated average earnings of males age 60-64 in the manufacturing industry (group 1) and males age 60-64 in the "other" industry group (group 2). The estimated average wage for group 1 is $\sim567$ and the standard error is $\sim92$. The estimated wage for group 2 is $\sim493$ and the standard error is $\sim65$. The square root of $92^2$ plus $65^2$ is $\sqrt{92^2 + 65^2} = 112.65$, so the detectable difference is $1.96 \times 112.65 = 220.79$. Since the difference is $567- 493  = 74$, we cannot claim the true values are statistically different. 
 
-# 4. Discussion
-## Research question 1
+# 3. Discussion
+## Most Granular Disaggregation and Age
+The most granular level of disaggregation that we can recommend as being statistically robust is the following:
+
+**For men:** 
+
+* Under 60: All 4 industries and region 
+* 60-64: All 4 industries and region 
+* 65-69: All 4 industries, no region 
+* 70-74: "Farming, forestry, and fishing" and other industries, no region 
+* 75-79: "Farming, forestry, and fishing" and other industries, no region 
+* 80+: No industry, no region \
+
+**For women:** 
+
+* Under 60: All 4 industries and region 
+* 60-64: "Farming, forestry, and fishing", "Manufacturing or construction", and other industries, no region 
+* 65-69: "Farming, forestry, and fishing" and other industries, no region 
+* 70-74: No industry, no region 
+* 75+: No industry, no region 
+  
+These groupings reflect a guiding principle of having a sample size of at least 150 in order to accurately estimate average earnings. We also examined using 10 year age bands in our analysis. Ultimately, for this survey, while 10 year age bands generally provide adequate sample size for females in the 60-69 year age group to add additional disaggregation by industry, it is insufficient in the 70-79 year age group or older. Thus, for women, 10 year age bands may be useful if disaggregation by industry is an area of primary interest. For men, there are enough employed individuals that we can fully disaggregate by industry using 5 year age bands in the 60-69 age range. At older ages, if disaggregation by industry is of primary interest, 10 year age bands might allow for additional disaggregation by industry. In general, at older ages, there are few employed people in this survey. There are only 696 employed men aged 75 or older and 98 employed women aged 75 or older. With this sample size, it is difficult to recommend any further disaggregation beyond one or two industry categories, age, and sex. 
+  
 For males and females under age 60 as well as males age 60-64, all 4 industry as well as urban/rural categories have enough sample to accurately estimate average wage of employed persons. For males 65-69 it is necessary to eliminate urban/rural but all 4 industry categories can be kept. For males age 70-74 and age 74-79 it is necessary to collapse to two industry categories while for males 80+ there are not enough employed persons to support any industry categories.
 
-For Females age 60-64 and age 65-69 some collapsing of industry categories is necessary while females 70+ and 75+ do not have enough employed for any industry categories,
+For each age group/sex combination, we have included disaggregation by various industries as well as no disaggregation by industry (rows in the "all" category in table 2). Increased disaggregation by industry appears to be useful primarily at younger ages where sample size is sufficient to detect differences in average weekly earnings. For example, "farming, forestry, or fishing" has consistently (and statistically significant) lower earnings than other industry categories across many age group/sex combinations. At older age groups, for example men aged 75-79, there is inadequate sample size to make this same determination. 
 
+## Including Region as a Secondary Level of Disaggregation
+We find that region (urban/rural) can only be used as a stratification for males and females under age 60 and males aged 60-64. Other age and sex categories simply do not have enough employed persons to accurately estimate average earnings when we use region as a secondary level of disaggregation. 
 
-## Research question 2
-Urban or rural can only be used for males and females under age 60 and males age 60-64. Other age and sex categories do not have enough employed persons for accurate estimation of average wage.
+Nevertheless, for the groups we were able to disaggregate by region, we find a statistically significant difference in average weekly earnings between urban and rural dwellers with urban individuals earning more than their rural counterparts. The differences appear to be smaller or nonexistent for individuals working in the "farming, forestry, or fishing" or construction industries. 
 
-## Research question 3
-Data disaggregation for other surveys depend heavily on the sample design and sample allocation. It is likely necessary to have at least 150 sample cases in any age/sex/industry or occupation/ geographic categories to define estimation groups. The survey designers need to keep this in mind. If estimates are desired for 5 year age/sex groups sufficient sample is necessary in those groups. 
+## Generalization of Results to Similar Surveys
+Data disaggregation for other surveys depend heavily on the sample design and sample allocation. It is likely necessary to have at least 150 sample cases in any age/sex/industry or occupation/geographic categories to define estimation groups. This is a consideration that the survey designers should keep in mind from the beginning of the survey process. In estimating income from working, it becomes difficult to perform much disaggregation at older ages (75/80+) where there are fewer working individuals. Out of approximately 457,000 individuals surveyed, ultimately only around 12,000 employed persons older than 60 were surveyed. This was sufficient for disaggregation at younger ages but we were unable to disaggregate much at older ages. In a study of income, if highly granular disaggregation at these older ages is desired then it may be beneficial to explore methods for increasing sample size in those older age groups.   
 
-# 5. Conclusion
+# 4. Conclusion
+In this report, we examined data from the employment and unemployment surveys included in the 2011 India National Sample Survey (NSS) to examine disaggregation in the context of computing statistically robust estimates of average earnings. For various combinations of age/sex/industry/region groupings, we calculated weighted estimates of average weekly earnings. In instances when sample size is deemed to small for an accurate estimate, we consalidated groups until we had enough persons in the group. Due to a complex sample design, we used a bootstrap method to estimate standard errors and 95% confidence intervals for these weighted estimates. Our results are included in the appendix and we provide analysis with particular consideration for generalization to similar surveys.
+\newpage
 
 # Appendix
 ```{r table2, echo = FALSE}
 # Separate by sex
-results_m = filter(results, grepl("Male", group))
-results_f = filter(results, grepl("Female", group))
+results_m = filter(results, sex == "Male")
+results_f = filter(results, sex == "Female")
 
-# Get data for the table
-### function to get data from bootstrap results
-t2_extract = function(t2_sex_group, t2_age_group, t2_industry_group = "", t2_geo = ""){
-  # Gets the group we want to extract
-  if(t2_industry_group == "" & t2_geo == ""){
-    t2_group = paste(t2_sex_group, t2_age_group, sep = ";")
-    }
-  else if(t2_industry_group == ""){
-    t2_group = paste(t2_sex_group, t2_age_group, t2_geo, sep = ";")
-  }
-  else if(t2_geo == ""){
-    t2_group = paste(t2_sex_group, t2_age_group, t2_industry_group, sep = ";")
-  }
-  else{ t2_group = paste(t2_sex_group, t2_age_group, t2_industry_group, t2_geo, sep = ";")}
-
-  # Now we have t2_group, extract results from the bootstrap df
-  if (t2_group %in% unique(results$group)){
-    filtered = filter(results, group == t2_group)
-    out = c(filtered$n, paste0(round(filtered$estimate, 1), " (", round(filtered$lower, 1), ", ", round(filtered$upper, 1), ")"), round(filtered$bootstrap_SE, 1))
-    return(out)
-  }
-  
-  # If t2_group isn't in the bootstrap results df, then just get count
-  else{ 
-    t2_filter_age_group = case_when(
-      t2_age_group == "70+" ~ c("70-79", "80+"),
-      t2_age_group == "75+" ~ c("75-79", "80+"),
-      TRUE ~ c(t2_age_group)
-    )
-    filtered = filter(employed, sex == t2_sex_group, age_group5 %in% t2_filter_age_group | age_group10 %in% t2_filter_age_group)
-    if(t2_industry_group != ""){
-      if(t2_industry_group == "Manufacturing or construction"){
-        filtered = filter(filtered, industry %in% c("Manufacturing", "Construction"))
-        }
-      else{
-         filtered = filter(filtered, industry == t2_industry_group)
-        }
-    }
-    if(t2_geo != ""){
-        filtered = filter(filtered, urban == ifelse(t2_geo == "Urban", 1, 0))
-      }
-    }
-    return(c(nrow(filtered),"-","-"))
-  }
-
-
-t2_data = data.frame(a = 1:50, b = 1:50, c = 1:50, d = 1:50, e = 1:50, f = 1:50)
-#t2_m_data = rbind(t2_extract())
+#t2_data = data.frame(a = 1:50, b = 1:50, c = 1:50, d = 1:50, e = 1:50, f = 1:50)
+t2_data = cbind(results_m$n, ifelse(is.na(results_m$estimate), "-", paste0(round(results_m$estimate,1), " (", round(results_m$lower,1), ", ", round(results_m$upper,1), ")")), ifelse(is.na(results_m$bootstrap_SE), "-", round(results_m$bootstrap_SE,1)), results_f$n, ifelse(is.na(results_f$estimate), "-", paste0(round(results_f$estimate,1), " (", round(results_f$lower,1), ", ", round(results_f$upper,1), ")")), ifelse(is.na(results_f$bootstrap_SE), "-", round(results_f$bootstrap_SE,1)))
 
 # Build labels
 t2_colnames = c("", rep(c("Count", "Estimate (95% CI)", "SE"),2))
-t2_rownames = c(rep(c("Farming, forestry, or fishing", "Manufacturing", "Construction", "Other"),5), "Farming, forestry, or fishing", "Manufacturing", "Construction", "Manufacturing or construction", "Other", rep(c("Farming, forestry, or fishing", "Manufacturing", "Construction", "Other"),3), "Farming, forestry, or fishing", "Manufacturing", "Construction", "Manufacturing or construction", "Other", "Farming, forestry, or fishing", "Other", "All", "Farming, forestry, or fishing", "Other", "All", "All", "All")  
+t2_rownames = c(rep(c("Farming, forestry, or fishing", "Manufacturing", "Construction", "Other", "All"), 3), rep(c("Farming, forestry, or fishing", "Manufacturing", "Construction", "Manufacturing or construction", "Other", "All"), 7), rep(c("Farming", "Other", "All"), 4), "All", "All")  
 
 #Build the table
 t2_raw = cbind(t2_rownames, t2_data)
@@ -249,22 +226,23 @@ kable(t2_raw,
   column_spec(1, width_min = "2in") %>%
   column_spec(2:7, width_min = "1in") %>%
   add_header_above(c(" " = 1, "Male" = 3, "Female" = 3)) %>%
-  pack_rows("Under 60, Urban", 1, 4) %>%
-  pack_rows("Under 60, Rural", 5, 8) %>%
-  pack_rows("Under 60, Urban and Rural", 9, 12) %>%
-  pack_rows("60-64, Urban", 13, 16) %>%
-  pack_rows("60-64, Rural", 17,20) %>%
-  pack_rows("60-64, Urban and Rural", 21, 25) %>%
-  pack_rows("65-69, Urban and Rural", 26, 29) %>%
-  pack_rows("60-69, Urban", 30, 33) %>%
-  pack_rows("60-69, Rural", 34, 37) %>%
-  pack_rows("60-69, Urban and Rural", 38, 42) %>%
-  pack_rows("70-74, Urban and Rural", 43, 45) %>%
-  pack_rows("70+, Urban and Rural", 46, 46) %>%
-  pack_rows("75-79, Urban and Rural", 47, 48) %>%
-  pack_rows("75+, Urban and Rurals", 49, 49) %>%
-  pack_rows("80+, Urban and Rural", 50, 50)
-
+  pack_rows("Under 60, Urban", 1, 5) %>%
+  pack_rows("Under 60, Rural", 6, 10) %>%
+  pack_rows("Under 60, Urban and Rural", 11, 15) %>%
+  pack_rows("60-64, Urban", 16, 21) %>%
+  pack_rows("60-64, Rural", 22,27) %>%
+  pack_rows("60-64, Urban and Rural", 28, 33) %>%
+  pack_rows("65-69, Urban and Rural", 34, 39) %>%
+  pack_rows("60-69, Urban", 40, 45) %>%
+  pack_rows("60-69, Rural", 46, 51) %>%
+  pack_rows("60-69, Urban and Rural", 52, 57) %>%
+  pack_rows("70-74, Urban and Rural", 58, 60) %>%
+  pack_rows("75-79, Urban and Rural", 61, 63) %>%
+  pack_rows("70-79, Urban and Rural", 64, 66) %>%
+  pack_rows("70+, Urban and Rural", 67, 69) %>%
+  pack_rows("75+, Urban and Rural", 70, 70) %>%
+  pack_rows("80+, Urban and Rural", 71, 71) %>%
+  footnote(general = "If the sample size of a group is less than 150, we do not provide an estimate of weekly earnings because we are not confident that the estimate is statistically robust. The exception is for women aged 75+ and men aged 60-64 working in construction in urban environments where estimates are included for the sake of completeness.", footnote_as_chunk = FALSE, threeparttable = TRUE)
 ```
 
 # References
