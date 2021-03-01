@@ -107,5 +107,7 @@
     }
 
 # Create a few more columns and save
-results = mutate(results, bootstrap_SE = sqrt(bootstrap_variance), lower = estimate - (1.96 * sqrt(bootstrap_variance)), upper = estimate + (1.96 * sqrt(bootstrap_variance))) 
+results = mutate(results, bootstrap_SE = sqrt(bootstrap_variance), 
+  lower_95 = estimate - (1.96 * sqrt(bootstrap_variance)), upper_95 = estimate + (1.96 * sqrt(bootstrap_variance)),
+  lower_90 = estimate - (1.645 * sqrt(bootstrap_variance)), upper_90 = estimate + (1.645 * sqrt(bootstrap_variance))) 
 write.csv(results, "../data/final/2011_India_LFS_bootstrap_results.csv", row.names = FALSE)

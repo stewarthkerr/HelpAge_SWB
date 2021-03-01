@@ -1,43 +1,20 @@
-# Ukraine
-## DHS
-**Note: This survey only included people aged 15 - 49, it is being shelved for now**
+# India LFS Introduction
+HelpAge International wants to challenge established norms for statistical reporting on older persons by proving that data disaggregation to a lower, more granular level is possible and statistically robust. Nongranular statistics reinforces an oversimplified picture of inequalities and the inadequate data itself becomes a barrier to the inclusion of at-risk and marginalized groups in policy and program responses. 
 
-Data: SAS datasets using the "haven" package to pull it into R
+To serve this goal, we analyzed data from the employment and unemployment surveys included in the 2011 India National Sample Survey (NSS)  to determine the lowest level of disaggregation that was possible while maintaining statistical robust estimates of average weekly earnings in rupees. The employment and unemployment surveys of the NSS aim to get estimates of various employment characteristics at the national and state level. In addition to employment related variables, individual characteristics such as region, age, sex, industry, education, and others are collected by the survey. In accordance with HelpAge's statement of work, our analysis focuses on sample size differences across varied groupings of age, sex, employment industry, and region (urban/rural) stratifiers. Additionally, we also provide preliminary findings on how average weekly earnings vary across these groupings. Disability status was only collected in relationship to employment (i.e. unable to work due to disability) and was not available to analyze in relation to average weekly earnings.
 
-Steps:
-- Load all of the individual and household data into R
-- Split the data into groups based on all primary levels of disaggregation:
-    - Individual: Age, sex, disability
-    - Household: Type of household
-- For each of the above splits, add a single secondary level of disaggregation:
-    - Urban/rural, ethnicity, 
-- Then, analyze the sample size needed to get a specified margin of error for the two variables of interest:
-    - Individual: Educational attainment by highest level of school attended
-    - Household: Proportion of population using safely managed drinking water services
-    - Have to either calculate standard error or use the provided standard error adjusted for reduced number of observations in the more disaggregated data
-- Also could calculate a 95% confidence interval and report the observed sample size at each level of disaggregation
+In our analysis, we sought to answer three specific research questions related to data disaggregation:
 
-# India
-## LFS
+1. What is the most granular level of disaggregation of age, sex, and employment industry? What are the most appropriate age bands (i.e. 5 year groupings or 10 year groupings) and upper age cohort (i.e. 80+, 85+, etc)? How does sample size differ going from broader to more granular disaggregation?
+2. What is the most granular level of disaggregation of age, sex, and employment industry when we also include geographic location (urban/rural)?
+3. Based on these results, what general recommendations or considerations can be made on data disaggregation for similar surveys?
 
-The India periodic labour force survey (PLFS) aims to measure the dynamics in labour force participation and employment status in the interval of 3 months. *It may not be super relevant to older populations.*
+For a detailed writeup of our analysis, see `India_LFS_report.pdf`.
 
-We use the 2011-2012 dataset because it has better documentation than the provided more recent dataset. 
+# Code
+The code for this project lives in the code folder. The scripts used include:
 
-We seek to understand the average hourly earnings of employees by sex, age, occuptation, and disability status. These characteristics are captured in the following variables:
-* Hourly earnings - Wage and salary earnings (in Rs) for the week prior to the subject being interviewed
-* Sex: Male (51.2%), Female (48.8%)
-* Age: 0 - 110, mean = 29.4
-* Occupation: NIC-2008 2-digit code. There are about 99 different occupations. We choose to group by crop and animal production, hunting and related services (code 01) vs. construction (code 41), retail trade (code 47), land transport (code 49), public administration (code 84), education (code 85), and other (everything else)
-* Disability status: The only information I can find about disability status is "not able to work due to disability". Earnings information is not collected for these people.
-
-The survey defines the labor force as everyone except those who have current_weekly_activity_status of:
-* Attended educational institution (91)
-* Attended domestic duties only (92)
-* Attended domestic duties and ... (93)
-* Rentiers, pensioners, remittance recipients, etc. (94), 
-* Not able to work due to disability (95), 
-* Others (97)
-* Did not work due to temporary sickness (for casual workers only)
-* Children, aged 0-4 (99)
-Earnings data was only collected for those people in the labor force. Because earnings data was only collected as the total earned in the past 7 days, we choose to activity status in the past 7 days to determine labor force participation.
+* `code/India_LFS_processing.R` - Takes the data extracted from the 2011 India NSS survey used Nesstar and processes the data to generate the file `data/processed/2011_India_LFS_individuals.csv`
+* `code/India_LFS_bootstrap.R` - takes `data/processed/2011_India_LFS_individuals.csv` and uses the bootstrap procedure to calculate 90% confidence intervals for average weekly earnings by various groupings. Results are saved to `data/final/2011_India_LFS_bootstrap_results.csv`
+* `code/India_LFS_tables.R` - takes `data/processed/2011_India_LFS_individuals.csv` and creates frequency tables for various groupings
+* `India_LFS_report.Rmd` - takes `data/processed/2011_India_LFS_individuals.csv` and `data/final/2011_India_LFS_bootstrap_results.csv` and generates the final report provided to HelpAge
